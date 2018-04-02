@@ -65,9 +65,17 @@ def Daemonize():
     os.setpgrp()
     os.nice(5)
 
+<<<<<<< HEAD
     #AB: ###########################################################################################
     #AB: # Consider here munlockall() to allow paging for lower priority processes i.e. all be main and video
     #AB: ###########################################################################################
+=======
+    '''
+    #AB: ###########################################################################################
+    #AB: # Consider here munlockall() to allow paging for lower priority processes i.e. all be main and video
+    #AB: ###########################################################################################
+    '''
+>>>>>>> fdc84d4293fe422aa581791003e56906eefb7c66
 
 
 ####################################################################################################
@@ -95,7 +103,11 @@ def SweepProcessor():
     warning_distance = SWEEP_WARNING_BOUNDARY
     warning_radians = 0.0
 
+<<<<<<< HEAD
     with serial.Serial("/dev/ttyUSB0",
+=======
+    with serial.Serial("/dev/ttySWEEP",
+>>>>>>> fdc84d4293fe422aa581791003e56906eefb7c66
                           baudrate = 115200,
                           parity = serial.PARITY_NONE,
                           bytesize = serial.EIGHTBITS,
@@ -150,12 +162,20 @@ def SweepProcessor():
                     angle_int = (azimuth_hi << 8) + azimuth_lo
                     degrees = (angle_int >> 4) + (angle_int & 15) / 16
 
+<<<<<<< HEAD
+=======
+                    '''
+>>>>>>> fdc84d4293fe422aa581791003e56906eefb7c66
                     #AB: ###########################################################################
                     #AB: # SIX SERIAL REFLECTION FROM THE WIFI ANTENNA TAKES ITS 15CM DISTANCE TO 90CM
                     #AB: # SMACK BANG IN THE CRITICAL ZONE!!! HENCE WE IGNORE THE RANGE OF ANGLES IT
                     #AB: # IS SEEN IN!!
                     #AB: ###########################################################################
+<<<<<<< HEAD
 
+=======
+                    '''
+>>>>>>> fdc84d4293fe422aa581791003e56906eefb7c66
                     if degrees > 95 and degrees < 97:
                         continue
 
@@ -178,6 +198,7 @@ def SweepProcessor():
                         #---------------------------------------------------------------------------
                         # Have we already sent a critical proximity?  No? Then all's clear.
                         #---------------------------------------------------------------------------
+<<<<<<< HEAD
 
                         #AB! This could be improved; there's only a need to send a NONE if the previous loop
                         #AB! sent a WARNING previously, and no WARNING this time round.
@@ -186,6 +207,15 @@ def SweepProcessor():
                             output = struct.pack(pack_format, False, False, 0.0, 0.0)
                             log_string = "PROXIMITY: %fm @ %f degrees.\n" % (distance, degrees % 360)
                             print ("PROXIMITY: %fm @ %f degrees.\n" % (distance, degrees % 360))
+=======
+                        '''
+                        #AB! This could be improved; there's only a need to send a NONE if the previous loop
+                        #AB! sent a WARNING previously, and no WARNING this time round.
+                        '''
+                        elif not sent_critical:
+                            output = struct.pack(pack_format, False, False, 0.0, 0.0)
+                            log_string = "PROXIMITY: %fm @ %f degrees.\n" % (distance, degrees % 360)
+>>>>>>> fdc84d4293fe422aa581791003e56906eefb7c66
 
                         if output != None:
                             sweep_fifo.write(output)
@@ -209,6 +239,10 @@ def SweepProcessor():
                     distance_hi = formatted[4]
                     distance = ((distance_hi << 8) + distance_lo) / 100
 
+<<<<<<< HEAD
+=======
+                    '''
+>>>>>>> fdc84d4293fe422aa581791003e56906eefb7c66
                     #-------------------------------------------------------------------------------
                     # Convert the results to a vector aligned with quad frame.
                     #-------------------------------------------------------------------------------
@@ -216,7 +250,11 @@ def SweepProcessor():
                     y = distance * math.sin(radians)
 
                     log.write("%f, %f, %f, %f\n" % (degrees, distance, x, y))
+<<<<<<< HEAD
 
+=======
+                    '''
+>>>>>>> fdc84d4293fe422aa581791003e56906eefb7c66
 
                     #-------------------------------------------------------------------------------
                     # If a reported distance lies inside the danger zone, pass it over to the autopilot
@@ -310,13 +348,15 @@ class SweepManager():
         self.sweep_fifo.close()
         os.unlink("/dev/shm/sweep_stream")
 
-
     #-----------------------------------------------------------------------------------------------
     # Start up the Sweep and GPS processes if installed
     #-----------------------------------------------------------------------------------------------
     running = True
+<<<<<<< HEAD
     log = open("autopilot.log", "wb")
 
+=======
+>>>>>>> fdc84d4293fe422aa581791003e56906eefb7c66
     try:
         sweep_started = False
 
@@ -329,7 +369,29 @@ class SweepManager():
             poll.register(sweep_fd, select.POLLIN | select.POLLPRI)
             sweep_started = True
 
+<<<<<<< HEAD
     except KeyboardInterrupt as e:
+=======
+    except:
+        #-------------------------------------------------------------------------------------------
+        # By setting this, we drop through the big while running the flight plans, and immediately
+        # send a finished message to the autopilot processor
+        #-------------------------------------------------------------------------------------------
+        running = False
+
+    #-----------------------------------------------------------------------------------------------
+    # Loop for the period of the flight defined by the flight plan contents
+    #-----------------------------------------------------------------------------------------------
+    pack_format = '=3f20s?' # edx, edy and edz float targets, string state name, bool running
+    log = open("autopilot.log", "wb")
+
+    #-------------------------------------------------------------------------------------------
+    # Off we go!
+    #-------------------------------------------------------------------------------------------
+
+
+        except KeyboardInterrupt as e:
+>>>>>>> fdc84d4293fe422aa581791003e56906eefb7c66
             #---------------------------------------------------------------------------------------
             # The motion processor is finished with us, we should too, and we have by breaking out of
             # the with.
@@ -337,6 +399,7 @@ class SweepManager():
             if not autopilot_fifo.closed:
                 print "Autopilot FIFO not closed! WTF!"
 
+<<<<<<< HEAD
     except Exception as e:
             log.write("AP: UNIDENTIFIED EXCEPTION: %s\n" % e)
 
@@ -345,11 +408,37 @@ class SweepManager():
             # Cleanup Sweep if installed.
             #---------------------------------------------------------------------------------------
             if sweep_started:
+=======
+        except Exception as e:
+            log.write("AP: UNIDENTIFIED EXCEPTION: %s\n" % e)
+
+        finally:
+            #---------------------------------------------------------------------------------------
+            # Cleanup Sweep if installed.
+            #---------------------------------------------------------------------------------------
+            if sweep_installed and sweep_started:
+>>>>>>> fdc84d4293fe422aa581791003e56906eefb7c66
                 print "Stopping Sweep... ",
                 sweepp.cleanup()
                 poll.unregister(sweep_fd)
                 print "stopped."
+<<<<<<< HEAD
                 log.close()
+=======
+
+    log.close()
+
+
+
+        #-------------------------------------------------------------------------------------------
+        # Unregister poll registrars
+        #-------------------------------------------------------------------------------------------
+        if self.autopilot_installed:
+            poll.unregister(autopilot_fd)
+
+        if self.camera_installed:
+            poll.unregister(video_fd)
+>>>>>>> fdc84d4293fe422aa581791003e56906eefb7c66
 
 
 
@@ -358,6 +447,7 @@ class SweepManager():
     # Shutdown triggered by early Ctrl-C or end of script
     #
     ################################################################################################
+<<<<<<< HEAD
 def shutdown(self):
     #-------------------------------------------------------------------------------------------
     # Close stats logging file.
@@ -370,6 +460,21 @@ def shutdown(self):
     munlockall()
 
     sys.exit(0)
+=======
+    def shutdown(self):
+
+        #-------------------------------------------------------------------------------------------
+        # Close stats logging file.
+        #-------------------------------------------------------------------------------------------
+        file_handler.close()
+
+        #-------------------------------------------------------------------------------------------
+        # Unlock memory we've used from RAM
+        #-------------------------------------------------------------------------------------------
+        munlockall()
+
+        sys.exit(0)
+>>>>>>> fdc84d4293fe422aa581791003e56906eefb7c66
 
 
 
@@ -379,5 +484,21 @@ def shutdown(self):
 # If we've been called directly, this is the spawned video, GPS, Sweep or autopilot process or a
 # misinformed user trying to start the code.
 ####################################################################################################
+<<<<<<< HEAD
 print ("Starting")
 SweepProcessor()
+=======
+if __name__ == '__main__':
+    if len(sys.argv) >= 2:
+
+        #-------------------------------------------------------------------------------------------
+        # Start the process recording Sweep
+        #-------------------------------------------------------------------------------------------
+        elif sys.argv[1] == "SWEEP":
+            assert (len(sys.argv) == 2), "Bad parameters for Sweep"
+            SweepProcessor()
+        else:
+            assert (False), "Invalid process request."
+    else:
+        print "If you're trying to run me, use 'sudo python ./qc.py'"
+>>>>>>> fdc84d4293fe422aa581791003e56906eefb7c66
